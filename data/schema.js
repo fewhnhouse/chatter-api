@@ -46,6 +46,18 @@ export const Schema = [
     createMessage(
       text: String!, userId: Int!, groupId: Int!
     ): Message
+    
+    # create a new group
+    createGroup(name: String!, userIds: [Int!], userid: Int!): Group
+
+    # delete a group
+    deleteGroup(id: Int!): Group
+
+    # leave a group as a user
+    leaveGroup(id: Int!, userId: !int): Group
+
+    # update a group with a new user
+    updateGroup(id: Int!, name: String!): Group
   }
   
   schema {

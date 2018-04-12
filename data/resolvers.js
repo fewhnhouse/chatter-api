@@ -56,7 +56,55 @@ export const Resolvers = {
         text,
         groupId
       });
+    },
+    createGroup(_, { name, userIds, userId }) {
+      return User.findOne({ where: { id: userId } })
+        .then(friends =>
+          Group.create({
+            name,
+            users: [user, ...friends]
+          })
+        )
+        .then(group => group.addUsers({ user, ...friends }))
+        .then(() => group);
+    },
+    deleteGroup(_, { id }) {
+      return Group.findOne({ where: id }).then(group => {
+        group
+          .getUsers()
+          .then(users => group.removeUsers(users))
+          .then(() => Message.destroy({ where: { groupId: group.id } }))
+          .then(() => group.destroy());
+      });
     }
+  },
+  async leaveGroup(_, { id, userId }) {
+    /*const group = await Group.findOne({ where: id });
+    await group.removeUser(userId);
+    const users = await group.getUsers();
+    if (!users.length) {
+      group.destroy();
+      //deleteGroup(_, { id });
+    }
+    return { id };
+    */
+    return Group.findOne({ where: id }).then(group => {
+      group.removeUser(userId).then(() => {
+        group.getUsers().then(users => {
+          if (!users.length) {
+            group.destroy();
+            //deleteGroup(_, { id });
+          }
+          return { id };
+        });
+      });
+    });
+    
+  },
+  updateGroup(_, { id, name }) {
+    return Group.findOne({ where: id }).then(group => {
+      group.update({ name });
+    });
   }
 };
 export default Resolvers;
