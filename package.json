@@ -1,0 +1,28 @@
+{
+  "name": "chatter-server",
+  "version": "1.0.0",
+  "description": "Express.js server for the chatter app.",
+  "main": "index.js",
+  "author": "Felix Wohnhaas",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon --watch server --watch package.json index.js --exec babel-node --presets es2015,stage-2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.2.2",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.10.0",
+    "nodemon": "^1.17.3"
+  },
+  "dependencies": {
+    "apollo-server-express": "^1.3.4",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.3",
+    "graphql": "^0.13.2",
+    "graphql-tools": "^2.24.0"
+  }
+}
