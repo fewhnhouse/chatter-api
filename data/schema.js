@@ -48,7 +48,7 @@ export const Schema = [
     ): Message
     
     # create a new group
-    createGroup(name: String!, userIds: [Int!], userid: Int!): Group
+    createGroup(name: String!, userIds: [Int!], userId: Int!): Group
 
     # delete a group
     deleteGroup(id: Int!): Group
