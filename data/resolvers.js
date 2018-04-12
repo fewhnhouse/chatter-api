@@ -78,7 +78,7 @@ export const Resolvers = {
       });
     }
   },
-  async leaveGroup(_, { id, userId }) {
+  leaveGroup(_, { id, userId }) {
     /*const group = await Group.findOne({ where: id });
     await group.removeUser(userId);
     const users = await group.getUsers();

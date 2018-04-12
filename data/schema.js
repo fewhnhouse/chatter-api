@@ -54,7 +54,7 @@ export const Schema = [
     deleteGroup(id: Int!): Group
 
     # leave a group as a user
-    leaveGroup(id: Int!, userId: !int): Group
+    leaveGroup(id: Int!, userId: Int!): Group
 
     # update a group with a new user
     updateGroup(id: Int!, name: String!): Group
