@@ -48,6 +48,15 @@ export const Resolvers = {
     friends(user) {
       return user.getFriends();
     }
+  },
+  Mutation: {
+    createMessage(_, { text, userId, groupId }) {
+      return Message.create({
+        userId,
+        text,
+        groupId
+      });
+    }
   }
 };
 export default Resolvers;
