@@ -3,6 +3,7 @@ import { withFilter } from "graphql-subscriptions";
 import { Group, Message, User } from "./connectors";
 import { pubsub } from "../subscriptions";
 const MESSAGE_ADDED_TOPIC = "messageAdded";
+const GROUP_ADDED_TOPIC = "groupAdded";
 
 export const Resolvers = {
   Date: GraphQLDate,
@@ -49,7 +50,15 @@ export const Resolvers = {
           Group.create({
             name,
             users: [user, ...friends]
-          }).then(group => group.addUsers([user, ...friends]).then(() => group))
+          }).then(group =>
+            group.addUsers([user, ...friends]).then(res => {
+              // append the user list to the group object
+              // to pass to pubsub so we can check members
+              group.users = [user, ...friends];
+              pubsub.publish(GROUP_ADDED_TOPIC, { [GROUP_ADDED_TOPIC]: group });
+              return group;
+            })
+          )
         )
       );
     },
@@ -94,6 +103,18 @@ export const Resolvers = {
             args.groupIds &&
               ~args.groupIds.indexOf(payload.messageAdded.groupId) &&
               args.userId !== payload.messageAdded.userId // don't send to user creating message
+          );
+        }
+      )
+    },
+    groupAdded: {
+      subscribe: withFilter(
+        () => pubsub.asyncIterator(GROUP_ADDED_TOPIC),
+        (payload, args) => {
+          return Boolean(
+            args.userId &&
+              ~map(payload.groupAdded.users, "id").indexOf(args.userId) &&
+              args.userId !== payload.groupAdded.users[0].id // don't send to user creating group
           );
         }
       )

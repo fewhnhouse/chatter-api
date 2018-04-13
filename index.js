@@ -32,6 +32,7 @@ app.use(
   })
 );
 const graphQLServer = createServer(app);
+
 graphQLServer.listen(GRAPHQL_PORT, () => {
   console.log(
     `GraphQL Server is now running on http://localhost:${GRAPHQL_PORT}${GRAPHQL_PATH}`
