@@ -6,14 +6,13 @@
   "author": "Felix Wohnhaas",
   "license": "MIT",
   "scripts": {
-    "start":
-      "nodemon --watch server --watch package.json index.js --exec babel-node --presets env,stage-2"
+    "start": "nodemon --watch server --watch package.json index.js --exec babel-node --presets env,stage-2"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "^8.2.2",
-    "babel-preset-stage-2": "^6.24.1",
     "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-2": "^6.24.1",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.10.0",
@@ -26,9 +25,11 @@
     "faker": "^4.1.0",
     "graphql": "^0.13.2",
     "graphql-date": "^1.0.3",
+    "graphql-subscriptions": "^0.5.8",
     "graphql-tools": "^2.24.0",
     "lodash": "^4.17.5",
     "sequelize": "^4.37.6",
-    "sqlite3": "^4.0.0"
+    "sqlite3": "^4.0.0",
+    "subscriptions-transport-ws": "^0.9.7"
   }
 }
