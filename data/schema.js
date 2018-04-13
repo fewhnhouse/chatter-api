@@ -29,14 +29,30 @@ export const Schema = [
     text: String! # message text
     createdAt: Date! # when message was created
   }
+
+  type MessageConnection {
+    edges: [MessageEdge]
+    pageInfo: PageInfo!
+  }
+
+  type MessageEdge {
+    cursor: String!
+    node: Message!
+  }
+
+  type PageInfo {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+  }
   
   # query for types
   type Query {
     # Return a user by their email or id
     user(email: String, id: Int): User
-    # Return messages sent by a user via userId
-    # Return messages sent to a group via groupId
-    messages(groupId: Int, userId: Int): [Message]
+
+    # Messages sent to group via relay cursor
+    messages(first: Int, after: String, last: Int, before: String): MessageConnection
+    
     # Return a group by its id
     group(id: Int!): Group
   }
