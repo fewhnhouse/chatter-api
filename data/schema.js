@@ -8,7 +8,7 @@ export const Schema = [
     id: Int! # unique id for the group
     name: String # name of the group
     users: [User]! # users in the group
-    messages: [Message] # messages sent to the group
+    messages(first: Int, after: String, last: Int, before: String): MessageConnection # Messages sent to group via relay cursor
   }
 
   # a user -- keep type really simple for now
@@ -50,9 +50,10 @@ export const Schema = [
     # Return a user by their email or id
     user(email: String, id: Int): User
 
-    # Messages sent to group via relay cursor
-    messages(first: Int, after: String, last: Int, before: String): MessageConnection
-    
+    # Return messages sent by a user via userId
+    # Return messages sent to a group via groupId
+    messages(groupId: Int, userId: Int): [Message]
+
     # Return a group by its id
     group(id: Int!): Group
   }
