@@ -86,9 +86,7 @@ export const Schema = [
     # for any of the groups with one of these groupIds
     messageAdded(userId: Int, groupIds: [Int]): Message
 
-    # Subscription fires on every message added
-    # for any of the groups with one of these groupIds
-    messageAdded(userId: Int, groupIds: [Int]): Message
+    # Subscription fires on every group added
     groupAdded(userId: Int): Group
   }
   
