@@ -7,4 +7,6 @@ yarn-error.log*
 
 .vscode
 
+.env 
+
 *.sqlite

@@ -23,6 +23,7 @@ export const Schema = [
     messages: [Message] # messages sent by user
     groups: [Group] # groups the user belongs to
     friends: [User] # user's friends/contacts
+    jwt: String # json web token for access
   }
 
   # a message sent from a user to a group
@@ -64,28 +65,26 @@ export const Schema = [
 
   type Mutation {
     # send a message to a group
-    createMessage(
-      text: String!, userId: Int!, groupId: Int!
-    ): Message
-    
-    # create a new group
-    createGroup(name: String!, userIds: [Int!], userId: Int!): Group
+    createMessage(text: String!, groupId: Int!): Message
 
-    # delete a group
+    createGroup(name: String!, userIds: [Int]): Group
+
     deleteGroup(id: Int!): Group
 
-    # leave a group as a user
-    leaveGroup(id: Int!, userId: Int!): Group
+    leaveGroup(id: Int!): Group # let user leave group
 
-    # update a group with a new user
     updateGroup(id: Int!, name: String!): Group
+
+    login(email: String!, password: String!): User
+
+    signup(email: String!, password: String!, username: String): User
   }
 
   type Subscription {
     # Subscription fires on every message added
     # for any of the groups with one of these groupIds
-    messageAdded(userId: Int, groupIds: [Int]): Message
-
+    messageAdded(groupIds: [Int]): Message
+    
     # Subscription fires on every group added
     groupAdded(userId: Int): Group
   }
