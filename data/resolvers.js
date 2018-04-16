@@ -1,6 +1,6 @@
 import GraphQLDate from "graphql-date";
 import { withFilter } from "graphql-subscriptions";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 import { Group, Message, User } from "./connectors";
