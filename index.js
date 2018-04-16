@@ -1,14 +1,19 @@
 import express from "express";
+import bodyParser from "body-parser";
+import jwt from "express-jwt";
 import { graphqlExpress, graphiqlExpress } from "apollo-server-express";
 import { makeExecutableSchema, addMockFunctionsToSchema } from "graphql-tools";
-import bodyParser from "body-parser";
 import { createServer } from "http";
 import { SubscriptionServer } from "subscriptions-transport-ws";
 import { execute, subscribe } from "graphql";
+
 import { Resolvers } from "./data/resolvers";
 import { Schema } from "./data/schema";
 import { Mocks } from "./data/mocks";
 import { executableSchema } from "./data/schema";
+import { User } from "./data/connectors";
+import { JWT_SECRET } from "./config";
+
 const GRAPHQL_PORT = 7070;
 const GRAPHQL_PATH = "/graphql";
 const SUBSCRIPTIONS_PATH = "/subscriptions";
@@ -19,10 +24,20 @@ const app = express();
 app.use(
   "/graphql",
   bodyParser.json(),
-  graphqlExpress({
+  jwt({
+    secret: JWT_SECRET,
+    credentialsRequired: false
+  }),
+  graphqlExpress(req => ({
     schema: executableSchema,
-    context: {} // at least(!) an empty object
-  })
+    context: {
+      user: req.user
+        ? User.findOne({
+            where: { id: req.user.id, version: req.user.version }
+          })
+        : Promise.resolve(null)
+    }
+  }))
 );
 app.use(
   "/graphiql",

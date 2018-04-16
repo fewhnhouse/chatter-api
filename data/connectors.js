@@ -1,6 +1,8 @@
 import { _ } from "lodash";
 import faker from "faker";
 import Sequelize from "sequelize";
+import bcrypt from "bcrypt";
+
 // initialize our database
 const db = new Sequelize("chatter", null, null, {
   dialect: "sqlite",
@@ -19,7 +21,8 @@ const MessageModel = db.define("message", {
 const UserModel = db.define("user", {
   email: { type: Sequelize.STRING },
   username: { type: Sequelize.STRING },
-  password: { type: Sequelize.STRING }
+  password: { type: Sequelize.STRING },
+  version: { type: Sequelize.INTEGER } // version the password
 });
 // users belong to multiple groups
 UserModel.belongsToMany(GroupModel, { through: "GroupUser" });
@@ -47,26 +50,29 @@ db.sync({ force: true }).then(() =>
       .then(group =>
         _.times(USERS_PER_GROUP, () => {
           const password = faker.internet.password();
-          return group
-            .createUser({
-              email: faker.internet.email(),
-              username: faker.internet.userName(),
-              password
-            })
-            .then(user => {
-              console.log(
-                "{email, username, password}",
-                `{${user.email}, ${user.username}, ${password}}`
-              );
-              _.times(MESSAGES_PER_USER, () =>
-                MessageModel.create({
-                  userId: user.id,
-                  groupId: group.id,
-                  text: faker.lorem.sentences(3)
-                })
-              );
-              return user;
-            });
+          return bcrypt.hash(password, 10).then(hash =>
+            group
+              .createUser({
+                email: faker.internet.email(),
+                username: faker.internet.userName(),
+                password: hash,
+                version: 1
+              })
+              .then(user => {
+                console.log(
+                  "{email, username, password}",
+                  `{${user.email}, ${user.username}, ${password}}`
+                );
+                _.times(MESSAGES_PER_USER, () =>
+                  MessageModel.create({
+                    userId: user.id,
+                    groupId: group.id,
+                    text: faker.lorem.sentences(3)
+                  })
+                );
+                return user;
+              })
+          );
         })
       )
       .then(userPromises => {
