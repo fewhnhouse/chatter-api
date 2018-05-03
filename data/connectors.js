@@ -1,7 +1,7 @@
 import { _ } from "lodash";
 import faker from "faker";
 import Sequelize from "sequelize";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 // initialize our database
 const db = new Sequelize("chatty", null, null, {
