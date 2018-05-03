@@ -22,7 +22,10 @@ export function getSubscriptionDetails({ baseParams, schema }) {
       );
     }
   });
+
   return { args, subscriptionName };
 }
 
 export const pubsub = new PubSub();
+
+export default pubsub;

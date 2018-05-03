@@ -1,23 +1,19 @@
 import express from "express";
-import bodyParser from "body-parser";
-import jwt from "express-jwt";
-import jsonwebtoken from "jsonwebtoken";
 import { graphqlExpress, graphiqlExpress } from "apollo-server-express";
-import { makeExecutableSchema, addMockFunctionsToSchema } from "graphql-tools";
+import bodyParser from "body-parser";
 import { createServer } from "http";
 import { SubscriptionServer } from "subscriptions-transport-ws";
 import { execute, subscribe } from "graphql";
+import jwt from "express-jwt";
+import jsonwebtoken from "jsonwebtoken";
 
-import { Resolvers } from "./data/resolvers";
-import { Schema } from "./data/schema";
-import { Mocks } from "./data/mocks";
+import { JWT_SECRET } from "./config";
+import { User } from "./data/connectors";
 import { getSubscriptionDetails } from "./subscriptions"; // make sure this imports before executableSchema!
 import { executableSchema } from "./data/schema";
-import { User } from "./data/connectors";
 import { subscriptionLogic } from "./data/logic";
-import { JWT_SECRET } from "./config";
 
-const GRAPHQL_PORT = 7070;
+const GRAPHQL_PORT = 8080;
 const GRAPHQL_PATH = "/graphql";
 const SUBSCRIPTIONS_PATH = "/subscriptions";
 
@@ -42,6 +38,7 @@ app.use(
     }
   }))
 );
+
 app.use(
   "/graphiql",
   graphiqlExpress({
@@ -49,6 +46,7 @@ app.use(
     subscriptionsEndpoint: `ws://localhost:${GRAPHQL_PORT}${SUBSCRIPTIONS_PATH}`
   })
 );
+
 const graphQLServer = createServer(app);
 
 graphQLServer.listen(GRAPHQL_PORT, () => {
@@ -59,6 +57,7 @@ graphQLServer.listen(GRAPHQL_PORT, () => {
     `GraphQL Subscriptions are now running on ws://localhost:${GRAPHQL_PORT}${SUBSCRIPTIONS_PATH}`
   );
 });
+
 // eslint-disable-next-line no-unused-vars
 const subscriptionServer = SubscriptionServer.create(
   {
@@ -75,6 +74,7 @@ const subscriptionServer = SubscriptionServer.create(
               if (err) {
                 rej("Invalid Token");
               }
+
               res(
                 User.findOne({
                   where: { id: decoded.id, version: decoded.version }
@@ -86,10 +86,12 @@ const subscriptionServer = SubscriptionServer.create(
           rej("No Token");
         }
       });
+
       return userPromise.then(user => {
         if (user) {
           return { user: Promise.resolve(user) };
         }
+
         return Promise.reject("No User");
       });
     },
@@ -99,6 +101,7 @@ const subscriptionServer = SubscriptionServer.create(
         baseParams,
         schema: executableSchema
       });
+
       // we need to implement this too!!!
       return subscriptionLogic[subscriptionName](
         baseParams,

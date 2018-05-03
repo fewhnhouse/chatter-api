@@ -1,6 +1,7 @@
 import GraphQLDate from "graphql-date";
 import { withFilter } from "graphql-subscriptions";
-import bcrypt from "bcryptjs";
+import { map } from "lodash";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 import { Group, Message, User } from "./connectors";
@@ -14,6 +15,7 @@ const GROUP_ADDED_TOPIC = "groupAdded";
 export const Resolvers = {
   Date: GraphQLDate,
   PageInfo: {
+    // we will have each connection supply its own hasNextPage/hasPreviousPage functions!
     hasNextPage(connection, args) {
       return connection.hasNextPage();
     },
@@ -21,7 +23,6 @@ export const Resolvers = {
       return connection.hasPreviousPage();
     }
   },
-
   Query: {
     group(_, args, ctx) {
       return groupLogic.query(_, args, ctx);
@@ -30,7 +31,6 @@ export const Resolvers = {
       return userLogic.query(_, args, ctx);
     }
   },
-
   Mutation: {
     createMessage(_, args, ctx) {
       return messageLogic.createMessage(_, args, ctx).then(message => {
@@ -39,7 +39,6 @@ export const Resolvers = {
         return message;
       });
     },
-
     createGroup(_, args, ctx) {
       return groupLogic.createGroup(_, args, ctx).then(group => {
         pubsub.publish(GROUP_ADDED_TOPIC, { [GROUP_ADDED_TOPIC]: group });
@@ -75,9 +74,11 @@ export const Resolvers = {
               ctx.user = Promise.resolve(user);
               return user;
             }
+
             return Promise.reject("password incorrect");
           });
         }
+
         return Promise.reject("email not found");
       });
     },
@@ -92,7 +93,8 @@ export const Resolvers = {
               User.create({
                 email,
                 password: hash,
-                username: username || email
+                username: username || email,
+                version: 1
               })
             )
             .then(user => {
@@ -103,13 +105,13 @@ export const Resolvers = {
               return user;
             });
         }
+
         return Promise.reject("email already exists"); // email already exists
       });
     }
   },
   Subscription: {
     messageAdded: {
-      // the subscription payload is the message.
       subscribe: withFilter(
         () => pubsub.asyncIterator(MESSAGE_ADDED_TOPIC),
         (payload, args, ctx) => {

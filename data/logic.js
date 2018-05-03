@@ -42,16 +42,20 @@ export const groupLogic = {
   messages(group, { first, last, before, after }) {
     // base query -- get messages from the right group
     const where = { groupId: group.id };
+
     // because we return messages from newest -> oldest
     // before actually means newer (date > cursor)
     // after actually means older (date < cursor)
+
     if (before) {
       // convert base-64 to utf8 iso date and use in Date constructor
       where.id = { $gt: Buffer.from(before, "base64").toString() };
     }
+
     if (after) {
       where.id = { $lt: Buffer.from(after, "base64").toString() };
     }
+
     return Message.findAll({
       where,
       order: [["id", "DESC"]],
@@ -61,6 +65,7 @@ export const groupLogic = {
         cursor: Buffer.from(message.id.toString()).toString("base64"), // convert createdAt to cursor
         node: message // the node is the message itself
       }));
+
       return {
         edges,
         pageInfo: {
@@ -68,6 +73,7 @@ export const groupLogic = {
             if (messages.length < (last || first)) {
               return Promise.resolve(false);
             }
+
             return Message.findOne({
               where: {
                 groupId: group.id,
@@ -145,6 +151,7 @@ export const groupLogic = {
       if (!user) {
         return Promise.reject("Unauthorized");
       }
+
       return Group.findOne({
         where: { id },
         include: [
@@ -157,6 +164,7 @@ export const groupLogic = {
         if (!group) {
           Promise.reject("No group found");
         }
+
         return group
           .removeUser(user.id)
           .then(() => group.getUsers())
@@ -185,12 +193,14 @@ export const groupLogic = {
     });
   }
 };
+
 export const userLogic = {
   email(user, args, ctx) {
     return getAuthenticatedUser(ctx).then(currentUser => {
       if (currentUser.id === user.id) {
         return currentUser.email;
       }
+
       return Promise.reject("Unauthorized");
     });
   },
@@ -199,6 +209,7 @@ export const userLogic = {
       if (currentUser.id !== user.id) {
         return Promise.reject("Unauthorized");
       }
+
       return user.getFriends({ attributes: ["id", "username"] });
     });
   },
@@ -207,6 +218,7 @@ export const userLogic = {
       if (currentUser.id !== user.id) {
         return Promise.reject("Unauthorized");
       }
+
       return user.getGroups();
     });
   },
@@ -218,6 +230,7 @@ export const userLogic = {
       if (currentUser.id !== user.id) {
         return Promise.reject("Unauthorized");
       }
+
       return Message.findAll({
         where: { userId: user.id },
         order: [["createdAt", "DESC"]]
@@ -229,6 +242,7 @@ export const userLogic = {
       if (user.id === args.id || user.email === args.email) {
         return user;
       }
+
       return Promise.reject("Unauthorized");
     });
   }
@@ -240,6 +254,7 @@ export const subscriptionLogic = {
       if (user.id !== args.userId) {
         return Promise.reject("Unauthorized");
       }
+
       baseParams.context = ctx;
       return baseParams;
     });
@@ -256,6 +271,7 @@ export const subscriptionLogic = {
           if (args.groupIds.length > groups.length) {
             return Promise.reject("Unauthorized");
           }
+
           baseParams.context = ctx;
           return baseParams;
         })

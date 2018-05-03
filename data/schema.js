@@ -1,4 +1,5 @@
 import { addMockFunctionsToSchema, makeExecutableSchema } from "graphql-tools";
+
 import { Mocks } from "./mocks";
 import { Resolvers } from "./resolvers";
 
@@ -7,12 +8,27 @@ export const Schema = [
   # declare custom scalars
   scalar Date
 
+  type MessageConnection {
+    edges: [MessageEdge]
+    pageInfo: PageInfo!
+  }
+
+  type MessageEdge {
+    cursor: String!
+    node: Message!
+  }
+
+  type PageInfo {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+  }
+
   # a group chat entity
   type Group {
     id: Int! # unique id for the group
     name: String # name of the group
     users: [User]! # users in the group
-    messages(first: Int, after: String, last: Int, before: String): MessageConnection # Messages sent to group via relay cursor
+    messages(first: Int, after: String, last: Int, before: String): MessageConnection # messages sent to the group
   }
 
   # a user -- keep type really simple for now
@@ -35,21 +51,6 @@ export const Schema = [
     createdAt: Date! # when message was created
   }
 
-  type MessageConnection {
-    edges: [MessageEdge]
-    pageInfo: PageInfo!
-  }
-
-  type MessageEdge {
-    cursor: String!
-    node: Message!
-  }
-
-  type PageInfo {
-    hasNextPage: Boolean!
-    hasPreviousPage: Boolean!
-  }
-  
   # query for types
   type Query {
     # Return a user by their email or id
@@ -66,17 +67,11 @@ export const Schema = [
   type Mutation {
     # send a message to a group
     createMessage(text: String!, groupId: Int!): Message
-
     createGroup(name: String!, userIds: [Int]): Group
-
     deleteGroup(id: Int!): Group
-
     leaveGroup(id: Int!): Group # let user leave group
-
-    updateGroup(id: Int!, name: String!): Group
-
+    updateGroup(id: Int!, name: String): Group
     login(email: String!, password: String!): User
-
     signup(email: String!, password: String!, username: String): User
   }
 
@@ -84,8 +79,6 @@ export const Schema = [
     # Subscription fires on every message added
     # for any of the groups with one of these groupIds
     messageAdded(groupIds: [Int]): Message
-    
-    # Subscription fires on every group added
     groupAdded(userId: Int): Group
   }
   
@@ -101,9 +94,11 @@ export const executableSchema = makeExecutableSchema({
   typeDefs: Schema,
   resolvers: Resolvers
 });
+
 // addMockFunctionsToSchema({
 //   schema: executableSchema,
 //   mocks: Mocks,
 //   preserveResolvers: true,
 // });
+
 export default executableSchema;

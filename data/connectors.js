@@ -1,22 +1,25 @@
 import { _ } from "lodash";
 import faker from "faker";
 import Sequelize from "sequelize";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 
 // initialize our database
-const db = new Sequelize("chatter", null, null, {
+const db = new Sequelize("chatty", null, null, {
   dialect: "sqlite",
-  storage: "./chatter.sqlite",
-  logging: true // mark this true if you want to see logs
+  storage: "./chatty.sqlite",
+  logging: false // mark this true if you want to see logs
 });
+
 // define groups
 const GroupModel = db.define("group", {
   name: { type: Sequelize.STRING }
 });
+
 // define messages
 const MessageModel = db.define("message", {
   text: { type: Sequelize.STRING }
 });
+
 // define users
 const UserModel = db.define("user", {
   email: { type: Sequelize.STRING },
@@ -24,22 +27,28 @@ const UserModel = db.define("user", {
   password: { type: Sequelize.STRING },
   version: { type: Sequelize.INTEGER } // version the password
 });
+
 // users belong to multiple groups
 UserModel.belongsToMany(GroupModel, { through: "GroupUser" });
+
 // users belong to multiple users as friends
 UserModel.belongsToMany(UserModel, { through: "Friends", as: "friends" });
+
 // messages are sent from users
 MessageModel.belongsTo(UserModel);
+
 // messages are sent to groups
 MessageModel.belongsTo(GroupModel);
+
 // groups have multiple users
 GroupModel.belongsToMany(UserModel, { through: "GroupUser" });
 
 // create fake starter data
 const GROUPS = 4;
 const USERS_PER_GROUP = 5;
-const MESSAGES_PER_USER = 15;
+const MESSAGES_PER_USER = 5;
 faker.seed(123); // get consistent data every time we reload app
+
 // you don't need to stare at this code too hard
 // just trust that it fakes a bunch of groups, users, and messages
 db.sync({ force: true }).then(() =>
@@ -93,4 +102,5 @@ db.sync({ force: true }).then(() =>
 const Group = db.models.group;
 const Message = db.models.message;
 const User = db.models.user;
+
 export { Group, Message, User };
